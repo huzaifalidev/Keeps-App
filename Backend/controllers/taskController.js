@@ -4,6 +4,7 @@ const taskCreate = async (req, res) => {
   try {
     const { title, description } = req.body;
     if (!title || !description) {
+      console.log("Test");
       return res.status(400).json({
         message: "Please fill all the fields",
       });
