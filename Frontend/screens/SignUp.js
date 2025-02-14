@@ -1,29 +1,39 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
-const SignUp = ({ navigation }) => {
+const SignUp = () => {
+  const navigation = useNavigation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignUp = async (navigation) => {
+  const handleSignUp = async () => {
     if (!name || !email || !password) {
       return Alert.alert("Error", "Please fill all fields.");
     }
     try {
+      console.log(name, email, password);
       const response = await axios.post(
         "http://192.168.100.33:8082/keeps/users/signUp",
-        name,
-        email,
-        password
+        {
+          name,
+          email,
+          password,
+        }
       );
       console.log(response.data.message);
-      await AsyncStorage.setItem("token", response.data.token);
-      navigation.navigate("SignIn");
+
+      Alert.alert(response.data.message, "Success");
+      setTimeout(() => {
+        navigation.navigate("SignIn");
+      }, 2000);
     } catch (error) {
-      console.error(error.message);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Something went wrong"
+      );
     }
   };
 
@@ -42,7 +52,7 @@ const SignUp = ({ navigation }) => {
       <TextInput
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text.trim())}
         keyboardType="email-address"
         style={styles.input}
       />

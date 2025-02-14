@@ -1,20 +1,35 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
-
-const SignIn = ({ navigation }) => {
+import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigation = useNavigation();
   const handleSignIn = async () => {
     if (!email || !password) {
       return Alert.alert("Error", "Please enter email and password.");
     }
     try {
-      await signIn(email, password);
-      Alert.alert("Success", "Logged in successfully!");
-      navigation.navigate("Home"); // Navigate to Home screen after login
+      console.log(email, password);
+      const response = await axios.post(
+        "http://192.168.100.33:8082/keeps/users/signIn",
+        {
+          email,
+          password,
+        }
+      );
+      Alert.alert(response.data.message, "this is the error");
+      await AsyncStorage.setItem("token", response.data.token);
+      setTimeout(() => {
+        navigation.navigate("TaskGallery");
+      }, 2000);
     } catch (error) {
-      Alert.alert("Error", error.message || "Sign In Failed");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Something went wrong"
+      );
     }
   };
 
@@ -27,7 +42,7 @@ const SignIn = ({ navigation }) => {
       <TextInput
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text.trim())}
         keyboardType="email-address"
         style={styles.input}
       />
