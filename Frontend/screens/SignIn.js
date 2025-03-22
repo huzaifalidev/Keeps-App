@@ -7,6 +7,7 @@ const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
+
   const handleSignIn = async () => {
     if (!email || !password) {
       return Alert.alert("Error", "Please enter email and password.");
@@ -14,13 +15,13 @@ const SignIn = () => {
     try {
       console.log(email, password);
       const response = await axios.post(
-        "http://192.168.100.33:8082/keeps/users/signIn",
+        "http://192.168.100.33:8082/keeps/user/signIn",
         {
           email,
           password,
         }
       );
-      Alert.alert(response.data.message, "this is the error");
+      Alert.alert(response.data.message, "You have successfully signed in.");
       await AsyncStorage.setItem("token", response.data.token);
       setTimeout(() => {
         navigation.navigate("TaskGallery");

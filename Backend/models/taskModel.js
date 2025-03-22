@@ -4,24 +4,27 @@ const taskSchema = new mongoose.Schema({
   taskId: {
     type: String,
     unique: true,
-    default: function Id() {
-      const randomNumber = Math.random() * 1000;
-      const ceilNumber = Math.ceil(randomNumber);
-      return ceilNumber;
+    default: function () {
+      return Math.ceil(Math.random() * 1000);
     },
   },
   title: {
     type: String,
-    require: true,
+    required: true,
   },
   description: {
     type: String,
-    require: true,
+    required: true,
   },
   submittedTime: {
     type: Date,
     default: Date.now,
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
-module.exports = mongoose.model("tasks", taskSchema);
+module.exports = mongoose.model("Task", taskSchema);

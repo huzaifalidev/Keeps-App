@@ -11,6 +11,7 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import SignUp from "./screens/SignUp";
 import SignIn from "./screens/SignIn";
+import PasswordGenerator from "./screens/PasswordGenerator";
 
 const Stack = createStackNavigator();
 export default function App() {
@@ -19,7 +20,7 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{ headerShown: false }}
-          initialRouteName="SignUp"
+          initialRouteName="TaskGallery"
         >
           <Stack.Screen name="CreateTask" component={CreateTask} />
           <Stack.Screen name="SignUp" component={SignUp} />
@@ -28,6 +29,10 @@ export default function App() {
           <Stack.Screen name="TaskGallery" component={TaskGallery} />
           <Stack.Screen name="SingleTask" component={SingleTask} />
           <Stack.Screen name="Counter" component={Counter} />
+          <Stack.Screen
+            name="PasswordGenerator"
+            component={PasswordGenerator}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const TaskGallery = () => {
   const [tasks, setTasks] = useState([]);
   const navigation = useNavigation();
@@ -18,10 +19,30 @@ const TaskGallery = () => {
   });
 
   const fetchData = async () => {
-    const response = await axios.get(
-      "http://192.168.100.33:8082/keeps/allTasks"
-    );
-    setTasks(response.data.Tasks);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        navigation.navigate("SignIn");
+        console.log("No token found");
+        return;
+      }
+      const response = await axios.get(
+        "http://192.168.100.33:8082/keeps/allTask",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setTasks(response.data.tasks);
+    } catch (error) {
+      console.log("Error fetching tasks:", error);
+    }
+  };
+
+  const logOut = async () => {
+    await AsyncStorage.removeItem("token");
+    navigation.navigate("SignIn");
   };
   useEffect(() => {
     fetchData();
@@ -88,6 +109,9 @@ const TaskGallery = () => {
         >
           +
         </Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={logOut}>
+        <Text>Logout</Text>
       </TouchableOpacity>
     </View>
   );

@@ -12,13 +12,14 @@ import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { setTitle, setDescription } from "../redux/slices/taskSlice";
 import CustomModal from "./Modal";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 const CreateTask = () => {
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
   });
-
+  const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
@@ -28,17 +29,30 @@ const CreateTask = () => {
 
   const handleSubmit = async () => {
     try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.log("No token found");
+        return;
+      }
+      console.log("Token", token);
       const response = await axios.post(
-        "http://192.168.100.33:8082/keeps/taskCreate",
+        "http://192.168.100.33:8082/keeps/task",
         {
           title,
           description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       dispatch(setDescription(""));
       dispatch(setTitle(""));
       setModalMessage(response.data.message);
       setModalVisible(true);
+      navigation.navigate("TaskGallery");
     } catch (error) {
       setModalMessage(error.response?.data?.message || "Error sending data");
       setModalVisible(true);

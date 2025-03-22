@@ -18,6 +18,6 @@ app.use(cors());
 const taskRoute = require("./routes/taskRoute");
 app.use("/keeps/", taskRoute);
 const userRoute = require("./routes/userRoute");
-app.use("/keeps/users/", userRoute);
+app.use("/keeps/user/", userRoute);
 
 app.listen(PORT, () => console.log(`Server is Running on PORT: ${PORT}`));

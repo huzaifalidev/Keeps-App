@@ -1,0 +1,3 @@
+1. LogOut
+2. Sessions use karo 1 minute bad band hojaye.
+3. Cookies use karo 1 minute bad band hojaye.

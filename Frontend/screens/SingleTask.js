@@ -10,6 +10,7 @@ import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import CustomModal from "./Modal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const SingleTask = () => {
   const route = useRoute();
   const { taskId } = route.params;
@@ -19,11 +20,26 @@ const SingleTask = () => {
   const [description, setDescription] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState(false);
+
   const fetchData = async () => {
     try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        navigation.navigate("SignIn");
+        console.log("No token found");
+      }
+      console.log("Token", token);
+      console.log("ID", taskId);
+
       const response = await axios.get(
-        `http://192.168.100.33:8082/keeps/searchTask/${taskId}`
+        `http://192.168.100.33:8082/keeps/task/${taskId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      console.log("Response", response.data);
       setModalMessage(response.data.message);
       setTask(response.data.task);
       setTitle(response.data.task.title);
@@ -37,15 +53,22 @@ const SingleTask = () => {
 
   const updateTask = async () => {
     try {
+      const token = await AsyncStorage.getItem("token");
       const response = await axios.put(
-        `http://192.168.100.33:8082/keeps/taskUpdate/${taskId}`,
+        `http://192.168.100.33:8082/keeps/task/${taskId}`,
         {
           title: title,
           description: description,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       setModalMessage(response.data.message);
       setModalVisible(true);
+      navigation.navigate("TaskGallery");
     } catch (error) {
       setModalMessage(error.message);
       setModalVisible(true);
@@ -54,12 +77,23 @@ const SingleTask = () => {
 
   const deleteTask = async () => {
     try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        console.log("No token found");
+        return;
+      }
+      console.log("Token", token);
       const response = await axios.delete(
-        `http://192.168.100.33:8082/keeps/deleteTask/${taskId}`
+        `http://192.168.100.33:8082/keeps/task/${taskId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      navigation.navigate("TaskGallery");
       setModalMessage(response.data.message);
       setModalVisible(true);
+      navigation.navigate("TaskGallery");
     } catch (error) {
       setModalMessage(error.message);
       setModalVisible(true);

@@ -4,12 +4,16 @@ const taskCreate = async (req, res) => {
   try {
     const { title, description } = req.body;
     if (!title || !description) {
-      console.log("Test");
-      return res.status(400).json({
-        message: "Please fill all the fields",
-      });
+      return res.status(400).json({ message: "Please fill all the fields" });
     }
-    const newTask = new taskModel({ title, description });
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+    const newTask = new taskModel({
+      title,
+      description,
+      userId: req.userId,
+    });
     const taskSaved = await newTask.save();
     return res.status(201).json({
       message: "Task Saved Successfully",
@@ -25,11 +29,22 @@ const taskCreate = async (req, res) => {
 
 const taskUpdate = async (req, res) => {
   try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
     const updates = req.body;
     const taskId = req.params.taskId;
-    const updatedTask = await taskModel.findOneAndUpdate({ taskId }, updates, {
-      new: true,
-    });
+    const updatedTask = await taskModel.findOneAndUpdate(
+      { userId: req.userId, taskId },
+      updates,
+      {
+        new: true,
+      }
+    );
+    if (!updatedTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
     return res.status(200).json({
       message: `${updatedTask.taskId} Task Successfully Updated`,
       updatedTask: updatedTask,
@@ -43,10 +58,16 @@ const taskUpdate = async (req, res) => {
 
 const getAllTask = async (req, res) => {
   try {
-    const allTasks = await taskModel.find({});
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
+    const allTasks = await taskModel.find({ userId: req.userId });
+    if (!allTasks) {
+      return res.status(404).json({ message: "Tasks Not Found" });
+    }
     return res.status(200).json({
-      message: "All Tasks are Successfully Fetched! ",
-      Tasks: allTasks,
+      message: "All Tasks Successfully Fetched!",
+      tasks: allTasks,
     });
   } catch (error) {
     res.status(500).json({
@@ -58,10 +79,22 @@ const getAllTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
   try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
     const taskId = req.params.taskId;
-    const searchedTask = await taskModel.findOneAndDelete({ taskId });
+    const deletedTask = await taskModel.findOneAndDelete({
+      userId: req.userId,
+      taskId: taskId,
+    });
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: "Task Not Found" });
+    }
+
     return res.status(200).json({
-      message: `${taskId} Task Successfully Deleted`,
+      message: `Task Successfully Deleted`,
+      deletedTask: deletedTask,
     });
   } catch (error) {
     return res
@@ -69,10 +102,20 @@ const deleteTask = async (req, res) => {
       .json({ message: "Server Error", error: error.message });
   }
 };
+
 const searchTask = async (req, res) => {
   try {
+    if (!req.userId) {
+      return res.status(401).json({ message: "Unauthorized access." });
+    }
     const taskId = req.params.taskId;
-    const searchedTask = await taskModel.findOne({ taskId });
+    const searchedTask = await taskModel.findOne({
+      userId: req.userId,
+      taskId: taskId,
+    });
+    if (!searchedTask) {
+      return res.status(404).json({ message: "Task Not Found" });
+    }
     return res.status(200).json({
       message: `${searchedTask.taskId} Task Successfully Found`,
       task: searchedTask,
