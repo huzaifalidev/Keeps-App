@@ -24,7 +24,9 @@ const SignIn = () => {
       Alert.alert(response.data.message, "You have successfully signed in.");
       await AsyncStorage.setItem("token", response.data.token);
       setTimeout(() => {
-        navigation.navigate("TaskGallery");
+        navigation.navigate("MainTabs", {
+          screen: "TaskGallery",
+        });
       }, 2000);
     } catch (error) {
       Alert.alert(
@@ -59,7 +61,11 @@ const SignIn = () => {
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("MainTabs", { screen: "TaskGallery" })
+        }
+      >
         <Text style={{ marginTop: 10, color: "blue" }}>
           Don't have an account? Sign Up
         </Text>
