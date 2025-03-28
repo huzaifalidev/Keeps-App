@@ -58,7 +58,9 @@ const TaskGallery = () => {
           <TouchableOpacity
             key={task.taskId || "Id not found"}
             onPress={() =>
-              navigation.navigate("SingleTask", { taskId: task.taskId })
+              navigation.navigate("SingleTask", {
+                taskId: task.taskId,
+              })
             }
           >
             <View style={styles.taskContainer}>

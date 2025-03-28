@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "712773562631",
+    "project_id": "taskmate-notifications",
+    "storage_bucket": "taskmate-notifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:712773562631:android:06ad78e6506b3d22fdd5a2",
+        "android_client_info": {
+          "package_name": "taskMate.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA08RPLvADbAcAxumAX7yC3FqZVf5ly3sA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

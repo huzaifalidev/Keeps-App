@@ -1,7 +1,12 @@
 const taskModel = require("../models/taskModel");
+const { sendPushNotification } = require("../utils/notifications");
 
 const taskCreate = async (req, res) => {
   try {
+    const expoPushToken =
+      req.headers["expo-push-token"] || req.body.expoPushToken;
+    console.log("Push Token:", expoPushToken); // Debug token
+
     const { title, description } = req.body;
     if (!title || !description) {
       return res.status(400).json({ message: "Please fill all the fields" });
@@ -9,17 +14,38 @@ const taskCreate = async (req, res) => {
     if (!req.userId) {
       return res.status(401).json({ message: "Unauthorized access." });
     }
+
     const newTask = new taskModel({
       title,
       description,
       userId: req.userId,
     });
     const taskSaved = await newTask.save();
+
+    // Send notification with better error handling
+    if (expoPushToken) {
+      try {
+        console.log("Attempting to send notification to:", expoPushToken);
+        await sendPushNotification(
+          expoPushToken,
+          "New Task Created",
+          `Task "${title}" has been created successfully! from backend - 11:32`
+        );
+        console.log("Notification sent successfully");
+      } catch (notificationError) {
+        console.error("Notification error:", notificationError);
+        // Continue with the response even if notification fails
+      }
+    } else {
+      console.log("No push token provided");
+    }
+
     return res.status(201).json({
       message: "Task Saved Successfully",
       data: taskSaved,
     });
   } catch (error) {
+    console.error("Task creation error:", error);
     return res.status(500).json({
       message: "Server Error",
       error: error.message,

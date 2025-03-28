@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import * as Notifications from "expo-notifications";
 import { useFonts } from "expo-font";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
@@ -27,19 +28,30 @@ const CreateTask = () => {
   const description = useSelector((state) => state.task.description);
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    // Set up notification handler
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }, []);
+
   const handleSubmit = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        console.log("No token found");
-        return;
-      }
-      console.log("Token", token);
+      const expoPushToken = await Notifications.getExpoPushTokenAsync({
+        projectId: "718c3d24-ad16-4101-ac2e-bc153f3bc91e",
+      });
+
       const response = await axios.post(
         "http://192.168.100.33:8082/keeps/task",
         {
           title,
           description,
+          expoPushToken: expoPushToken.data,
         },
         {
           headers: {
@@ -48,12 +60,32 @@ const CreateTask = () => {
           },
         }
       );
+
+      // // Show in-app notification
+      // await Notifications.scheduleNotificationAsync({
+      //   content: {
+      //     title: "Task Created",
+      //     body: `Your task "${title}" has been created successfully! from backend`,
+      //     data: { screen: "TaskGallery" },
+      //   },
+      //   trigger: null, // null means show immediately
+      // });
+
       dispatch(setDescription(""));
       dispatch(setTitle(""));
       setModalMessage(response.data.message);
       setModalVisible(true);
       navigation.navigate("TaskGallery");
     } catch (error) {
+      // Show error notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Error",
+          body: error.response?.data?.message || "Error creating task",
+        },
+        trigger: null,
+      });
+
       setModalMessage(error.response?.data?.message || "Error sending data");
       setModalVisible(true);
     }
